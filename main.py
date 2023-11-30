@@ -1,6 +1,4 @@
-from sklearn.datasets import fetch_20newsgroups
 from sklearn.metrics.cluster import normalized_mutual_info_score, adjusted_rand_score
-from sentence_transformers import SentenceTransformer
 import numpy as np
 import pandas as pd
 import prince
@@ -31,15 +29,11 @@ def dim_red(mat, p, method):
         red_mat = TSNE(n_components=p, learning_rate='auto',init='random').fit_transform(mat)
                 
     elif method=='UMAP':
-        category_labels = [ng20.target_names[x] for x in ng20.target]
-        hover_df = pd.DataFrame(category_labels, columns=['category'])
-        hover_df = hover_df[:2000]
-
         reducer = umap.UMAP(n_components=p)
         red_mat = reducer.fit_transform(mat)
 
         mapper = umap.UMAP().fit(mat)
-        umap.plot.points(mapper, labels=hover_df['category'])
+        umap.plot.points(mapper, labels=labels)
         plt.show()
         
     else:
@@ -67,7 +61,7 @@ def plot_ACP(mat):
     # Tracer les centroids
     plt.scatter(centroids[:, 0], centroids[:, 1], s=100, c='black', marker='x', label='Centroids')
 
-    plt.title('K-Means Clustering')
+    plt.title('K-Means Clustering (ACP)',)
     plt.xlabel('Dimension 1')
     plt.ylabel('Dimension 2')
     plt.legend(loc='best')
@@ -111,14 +105,9 @@ def cross_validation(mat,N):
   print(f"the mean of ARI is {np.mean(ari)}")
 
 # import data
-ng20 = fetch_20newsgroups(subset='test')
-corpus = ng20.data[:2000]
-labels = ng20.target[:2000]
-k = len(set(labels))
-
-# embedding
-model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
-embeddings = model.encode(corpus)
+k = 20
+embeddings = np.load('embeddings.npy')
+labels = np.load('labels.npy')
 
 # Perform dimensionality reduction and clustering for each method
 methods = ['ACP', 'TSNE', 'UMAP']
