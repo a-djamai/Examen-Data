@@ -31,9 +31,9 @@ def dim_red(mat, p, method):
     if method=='ACP':
         red_mat = mat[:,:p]
         
-    elif method=='AFC':
-        red_mat = mat[:,:p]
-        
+    elif method=='TSNE':
+        red_mat = TSNE(n_components=p, learning_rate='auto',init='random').fit_transform(mat)
+                
     elif method=='UMAP':
         category_labels = [ng20.target_names[x] for x in ng20.target]
         hover_df = pd.DataFrame(category_labels, columns=['category'])
@@ -64,7 +64,7 @@ def clust(mat, k):
         pred : list of predicted labels
     '''
     
-    pred = np.random.randint(k, size=len(corpus))
+    pred = KMeans(n_clusters=k, n_init="auto").fit(mat)
     
     return pred
 
