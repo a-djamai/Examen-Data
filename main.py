@@ -40,6 +40,7 @@ def dim_red(mat, p, method):
 
         mapper = umap.UMAP().fit(mat)
         umap.plot.points(mapper, labels=hover_df['category'])
+        plt.show()
         
     else:
         raise Exception("Please select one of the three methods : APC, AFC, UMAP")
@@ -86,7 +87,7 @@ def plot_TSNE(mat):
     u_labels = np.unique(pred_labels)
 
     for i in u_labels:
-        plt.scatter(mat[pred_labels == i , 0] , mat[pred_labels == i , 1] , label = i)
+        plt.scatter(pred_final[pred_labels == i , 0] , pred_final[pred_labels == i , 1] , label = i)
     plt.title('K-means Clustering (TSNE)')
     plt.scatter(centroids[:,0] , centroids[:,1] , s = 80, color = 'k')
     plt.legend()
@@ -141,6 +142,9 @@ for method in methods:
     if(method == 'TSNE'):
         # perform dimentionality reduction
         plot_TSNE(embeddings)
+    if(method == 'ACP'):
+        # perform dimentionality reduction
+        plot_ACP(embeddings)
     print("Cross Validation for ", method)   
     cross_validation(red_emb,10)
     # Print results
