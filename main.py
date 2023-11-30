@@ -4,6 +4,7 @@ from sentence_transformers import SentenceTransformer
 import numpy as np
 import pandas as pd
 import prince
+from sklearn.manifold import TSNE
 from sklearn.cluster import KMeans
 import umap
 import umap.plot
@@ -47,11 +48,11 @@ def dim_red(mat, p, method):
 
 
 def clust(mat, k):
-    pred = KMeans(n_clusters=k, n_init="auto").fit(mat)   
+    pred = KMeans(n_clusters=k).fit(mat)   
     return pred 
 
 def plot_ACP(mat):
-    red_mat = dim_red(mat,2)
+    red_mat = dim_red(mat,2,"ACP")
     pred = clust(red_mat,20)
     centroids = pred.cluster_centers_
     plt.figure(figsize=(8, 6))
@@ -76,7 +77,7 @@ def plot_ACP(mat):
 #plotting the results:
 def plot_TSNE(mat):
     # perform dimentionality reduction
-    pred_final = dim_red(mat, 2)
+    pred_final = dim_red(mat, 2,"TSNE")
     pred_clust = clust(pred_final, k)
 
     pred_labels= pred_clust.labels_
@@ -85,7 +86,7 @@ def plot_TSNE(mat):
     u_labels = np.unique(pred_labels)
 
     for i in u_labels:
-        plt.scatter(pred_tsne[pred_labels == i , 0] , pred_tsne[pred_labels == i , 1] , label = i)
+        plt.scatter(mat[pred_labels == i , 0] , mat[pred_labels == i , 1] , label = i)
     plt.title('K-means Clustering (TSNE)')
     plt.scatter(centroids[:,0] , centroids[:,1] , s = 80, color = 'k')
     plt.legend()
@@ -121,6 +122,7 @@ embeddings = model.encode(corpus)
 # Perform dimensionality reduction and clustering for each method
 methods = ['ACP', 'TSNE', 'UMAP']
 for method in methods:
+    print("----------------" + method + "----------------")
     n_components = 20 
 
     if(method == 'TSNE'):
@@ -133,8 +135,8 @@ for method in methods:
     pred = clust(red_emb, k)
 
     # Evaluate clustering results
-    nmi_score = normalized_mutual_info_score(pred, labels)
-    ari_score = adjusted_rand_score(pred, labels)
+    nmi_score = normalized_mutual_info_score(pred.labels_, labels)
+    ari_score = adjusted_rand_score(pred.labels_, labels)
 
     if(method == 'TSNE'):
         # perform dimentionality reduction
