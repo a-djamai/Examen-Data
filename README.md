@@ -69,3 +69,15 @@ Measures shared information between actual and predicted clusters, scaling Mutua
 
 ### ARI (Adjusted Rand Index)
 An adjustment of the Rand Index, scaling from -1 to 1 to indicate clustering accuracy against a ground truth.
+
+
+### Results:
+#### UMAP:
+![umap](https://github.com/a-djamai/Examen-Data/assets/86471508/3732fb13-4d9b-4e4b-b5c1-4a56aa6e91cc)
+
+#### TSNE:
+![tsne](https://github.com/a-djamai/Examen-Data/assets/86471508/37228292-74f9-4d7b-bd4a-a3d8308b6df3)
+
+#### PCA:
+![acp](https://github.com/a-djamai/Examen-Data/assets/86471508/0504c462-a26f-405e-80b5-bfef99d1a858)
+
