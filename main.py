@@ -1,9 +1,8 @@
-from sklearn.datasets import fetch_20newsgroups
 from sklearn.metrics.cluster import normalized_mutual_info_score, adjusted_rand_score
-from sentence_transformers import SentenceTransformer
 import numpy as np
 import pandas as pd
 import prince
+from sklearn.manifold import TSNE
 from sklearn.cluster import KMeans
 import umap
 import umap.plot
@@ -30,15 +29,12 @@ def dim_red(mat, p, method):
         red_mat = TSNE(n_components=p, learning_rate='auto',init='random').fit_transform(mat)
                 
     elif method=='UMAP':
-        category_labels = [ng20.target_names[x] for x in ng20.target]
-        hover_df = pd.DataFrame(category_labels, columns=['category'])
-        hover_df = hover_df[:2000]
-
         reducer = umap.UMAP(n_components=p)
         red_mat = reducer.fit_transform(mat)
 
         mapper = umap.UMAP().fit(mat)
-        umap.plot.points(mapper, labels=hover_df['category'])
+        umap.plot.points(mapper, labels=labels)
+        plt.show()
         
     else:
         raise Exception("Please select one of the three methods : APC, AFC, UMAP")
@@ -47,11 +43,11 @@ def dim_red(mat, p, method):
 
 
 def clust(mat, k):
-    pred = KMeans(n_clusters=k, n_init="auto").fit(mat)   
+    pred = KMeans(n_clusters=k).fit(mat)   
     return pred 
 
 def plot_ACP(mat):
-    red_mat = dim_red(mat,2)
+    red_mat = dim_red(mat,2,"ACP")
     pred = clust(red_mat,20)
     centroids = pred.cluster_centers_
     plt.figure(figsize=(8, 6))
@@ -65,7 +61,7 @@ def plot_ACP(mat):
     # Tracer les centroids
     plt.scatter(centroids[:, 0], centroids[:, 1], s=100, c='black', marker='x', label='Centroids')
 
-    plt.title('K-Means Clustering')
+    plt.title('K-Means Clustering (ACP)',)
     plt.xlabel('Dimension 1')
     plt.ylabel('Dimension 2')
     plt.legend(loc='best')
@@ -76,7 +72,7 @@ def plot_ACP(mat):
 #plotting the results:
 def plot_TSNE(mat):
     # perform dimentionality reduction
-    pred_final = dim_red(mat, 2)
+    pred_final = dim_red(mat, 2,"TSNE")
     pred_clust = clust(pred_final, k)
 
     pred_labels= pred_clust.labels_
@@ -85,7 +81,7 @@ def plot_TSNE(mat):
     u_labels = np.unique(pred_labels)
 
     for i in u_labels:
-        plt.scatter(pred_tsne[pred_labels == i , 0] , pred_tsne[pred_labels == i , 1] , label = i)
+        plt.scatter(pred_final[pred_labels == i , 0] , pred_final[pred_labels == i , 1] , label = i)
     plt.title('K-means Clustering (TSNE)')
     plt.scatter(centroids[:,0] , centroids[:,1] , s = 80, color = 'k')
     plt.legend()
@@ -109,18 +105,14 @@ def cross_validation(mat,N):
   print(f"the mean of ARI is {np.mean(ari)}")
 
 # import data
-ng20 = fetch_20newsgroups(subset='test')
-corpus = ng20.data[:2000]
-labels = ng20.target[:2000]
-k = len(set(labels))
-
-# embedding
-model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
-embeddings = model.encode(corpus)
+k = 20
+embeddings = np.load('embeddings.npy')
+labels = np.load('labels.npy')
 
 # Perform dimensionality reduction and clustering for each method
 methods = ['ACP', 'TSNE', 'UMAP']
 for method in methods:
+    print("----------------" + method + "----------------")
     n_components = 20 
 
     if(method == 'TSNE'):
@@ -133,12 +125,15 @@ for method in methods:
     pred = clust(red_emb, k)
 
     # Evaluate clustering results
-    nmi_score = normalized_mutual_info_score(pred, labels)
-    ari_score = adjusted_rand_score(pred, labels)
+    nmi_score = normalized_mutual_info_score(pred.labels_, labels)
+    ari_score = adjusted_rand_score(pred.labels_, labels)
 
     if(method == 'TSNE'):
         # perform dimentionality reduction
         plot_TSNE(embeddings)
+    if(method == 'ACP'):
+        # perform dimentionality reduction
+        plot_ACP(embeddings)
     print("Cross Validation for ", method)   
     cross_validation(red_emb,10)
     # Print results
