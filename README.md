@@ -37,13 +37,34 @@ Before starting, ensure you have:
    ```
    pip install -r requirements.txt
    ```
-
+   
 ### Running the Project
 Execute the project with:
 ```
 python main.py
 ```
 Replace `main.py` with your primary script name.
+
+## Docker Image
+
+We have packaged this project into a Docker image for ease of use and deployment. The image includes all necessary dependencies and is preconfigured to run the application.
+
+### Pulling the Docker Image
+
+To use the Docker image, first ensure you have Docker installed on your system. Then, pull the image from Docker Hub using the following command:
+
+```bash
+docker pull zaki1003/examen-data
+```
+
+### Running the Docker Container
+
+After pulling the image, you can run the container with:
+
+```bash
+docker run -p 4000:80 zaki1003/examen-data
+```
+
 
 ### Additional Notes
 - Ensure the 20 Newsgroups dataset is downloaded and prepared before executing the clustering algorithms.
