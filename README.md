@@ -1,4 +1,4 @@
-# Dimensionality Reduction in Text Classification
+# Dimensionality Reduction in Text Clustering
 
 ## Overview
 This repository demonstrates the use of three popular dimensionality reduction techniques — Principal Component Analysis (PCA), Uniform Manifold Approximation and Projection (UMAP), and t-Distributed Stochastic Neighbor Embedding (t-SNE) — for text clustering tasks, utilizing the 20 Newsgroups dataset from sklearn.datasets.
