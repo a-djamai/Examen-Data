@@ -2,6 +2,18 @@ from sklearn.datasets import fetch_20newsgroups
 from sklearn.metrics.cluster import normalized_mutual_info_score, adjusted_rand_score
 from sentence_transformers import SentenceTransformer
 import numpy as np
+import umap
+from sklearn.cluster import KMeans
+import umap.plot
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score, StratifiedKFold
+from matplotlib.colors import ListedColormap
+import matplotlib.pyplot as plt
+
+from sklearn.preprocessing import MaxAbsScaler
+
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 
 
 def dim_red(mat, p, method):
@@ -23,7 +35,15 @@ def dim_red(mat, p, method):
         red_mat = mat[:,:p]
         
     elif method=='UMAP':
-        red_mat = mat[:,:p]
+        category_labels = [ng20.target_names[x] for x in ng20.target]
+        hover_df = pd.DataFrame(category_labels, columns=['category'])
+        hover_df = hover_df[:2000]
+
+        reducer = umap.UMAP(n_components=p)
+        red_mat = reducer.fit_transform(mat)
+
+        mapper = umap.UMAP().fit(mat)
+        umap.plot.points(mapper, labels=hover_df['category'])
         
     else:
         raise Exception("Please select one of the three methods : APC, AFC, UMAP")
@@ -73,4 +93,20 @@ for method in methods:
 
     # Print results
     print(f'Method: {method}\nNMI: {nmi_score:.2f} \nARI: {ari_score:.2f}\n')
+
+def cross_validate_reduction(red_emb, X, y, n_components=2):
+    reduced_X = red_emb
+    clf = RandomForestClassifier()
+    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    scores = cross_val_score(clf, reduced_X, y, cv=cv, scoring='accuracy')
+    return scores
+
+# reduce_with_X = red_emb with method X
+umap_scores = cross_validate_reduction(red_emb, corpus, labels)
+#pca_scores = cross_validate_reduction(red_emb, corpus, labels)
+#tsne_scores = cross_validate_reduction(red_emb, corpus, labels)
+
+print("UMAP Scores:", umap_scores)
+#print("PCA Scores:", pca_scores)
+#print("t-SNE Scores:", tsne_scores)
 
